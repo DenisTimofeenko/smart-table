@@ -46,8 +46,8 @@ async function render(action) {
   let state = collectState() // состояние полей из таблицы
   let query = {} // здесь будут формироваться параметры запроса
   // другие apply*
-  // result = applySearching(result, state, action);
-  // result = applyFiltering(result, state, action);
+  query = applySearching(query, state, action)
+  query = applyFiltering(query, state, action)
   // result = applySorting(result, state, action);
   query = applyPagination(query, state, action) // обновляем query
 
@@ -69,10 +69,13 @@ const sampleTable = initTable(
 
 // @todo: инициализация
 
-// const applyFiltering = initFiltering(sampleTable.filter.elements, {
-//   // передаём элементы фильтра
-//   searchBySeller: indexes.sellers, // для элемента с именем searchBySeller устанавливаем массив продавцов
-// })
+const { applyFiltering, updateIndexes } = initFiltering(
+  sampleTable.filter.elements,
+  {
+    // передаём элементы фильтра
+    searchBySeller: [], // для элемента с именем searchBySeller устанавливаем массив продавцов
+  }
+)
 
 const applySorting = initSorting([
   // Нам нужно передать сюда массив элементов, которые вызывают сортировку, чтобы изменять их визуальное представление
@@ -93,11 +96,17 @@ const { applyPagination, updatePagination } = initPagination(
   }
 )
 
+const applySearching = initSearching("search")
+
 const appRoot = document.querySelector("#app")
 appRoot.appendChild(sampleTable.container)
 
 async function init() {
   const indexes = await api.getIndexes()
+
+  updateIndexes(sampleTable.filter.elements, {
+    searchBySeller: indexes.sellers,
+  })
 }
 
 init().then(render)
